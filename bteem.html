@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +7,7 @@
      Strict-Transport-Security: max-age=31536000; includeSubDomains
      X-Content-Type-Options: nosniff | Referrer-Policy: no-referrer | X-Frame-Options: DENY -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https:; base-uri 'none'; form-action 'self'" />
-<title>BlitzThreat EEM Launcher</title>
+<title>BlitzThreat EEM (BTEEM) - Environmental Event Management</title>
 <meta name="theme-color" content="#000000" />
 <style>
   :root { --bg:#0a0a0a; --panel:#111; --line:#222; --dim:#777; --g1:#158044; --g2:#2aff88; --g3:#4cf29a; }
@@ -36,6 +35,9 @@
   .hint { color:var(--dim); font-size:1rem; margin:0 auto 2rem; max-width:34rem; }
   h2 { font-size:1rem; color:var(--dim); font-weight:600; margin:2rem 0 .8rem; }
   .mod { background:transparent; border:1px solid var(--line); color:#555; padding:.5rem 1rem; font-weight:600; }
+  a.mod { text-decoration:none; border-radius:8px; font-size:.9rem; }
+  a.mod.live { border-color:var(--g1); color:var(--g3); }
+  a.mod.live:hover { background:var(--g1); color:#000; }
   footer { background:var(--panel); color:#aaa; font-size:.9rem; text-align:center; padding:10px 0; border-top:1px solid var(--line); }
 
   /* Splash / login */
@@ -79,7 +81,7 @@
   <h2>Coming to the suite</h2>
   <div class="row">
     <button class="mod" disabled>Incident Response</button>
-    <button class="mod" disabled>CVE / CVSS</button>
+    <a class="mod live" href="dashboard.html">CVE / CVSS Dashboard</a>
     <button class="mod" disabled>Telemetry</button>
     <button class="mod" disabled>App Logs</button>
     <button class="mod" disabled>BlitzGate</button>
