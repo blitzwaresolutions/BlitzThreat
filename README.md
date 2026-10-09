@@ -33,9 +33,9 @@ python3 -m http.server 8080
 
 ## Deploy on GitHub Pages
 
-1. Push this folder to a repository, for example `blitzwaresolutions/blitzthreat-eem`.
+1. Push this folder to a repository, for example `blitzwaresolutions/blitzthreat`.
 2. In **Settings > Pages**, set the source to the `main` branch, root folder.
-3. The demo is served over HTTPS at `https://blitzwaresolutions.github.io/blitzthreat-eem/`.
+3. The demo is served over HTTPS at `https://blitzwaresolutions.github.io/blitzthreat/`.
 
 Then point the "Launch demo" button in `blitzthreat.html` (in the `bws` repository) at that URL.
 
