@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; base-uri 'none'; form-action 'none'" />
+<title>BlitzThreat EEM - CVE Dashboard</title>
+<meta name="theme-color" content="#000000" />
+<style>
+  :root { --bg:#0a0a0a; --panel:#111; --line:#222; --dim:#777; --g1:#158044; --g2:#2aff88; --g3:#4cf29a;
+    --crit:#ff4d4d; --high:#ff9f43; --med:#f6d34a; --low:#4cf29a; --uns:#666; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100dvh; display:flex; flex-direction:column; background:var(--bg); color:#eee;
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; }
+  header, main { width:100%; max-width:70rem; margin:0 auto; padding:1rem; }
+  h1 { margin:0; font-size:1.8rem; color:var(--g2); text-shadow:0 0 10px rgba(42,255,136,.6); }
+  .meta { color:var(--dim); font-size:.85rem; margin:.3rem 0 0; }
+  a { color:var(--g3); }
+  main { flex:1; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(9rem,1fr)); gap:.8rem; margin-bottom:1rem; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:.8rem; }
+  .card b { display:block; font-size:1.8rem; } .card span { color:var(--dim); font-size:.8rem; }
+  .bar { display:flex; height:12px; border-radius:6px; overflow:hidden; background:#1a1a1a; margin-bottom:1.2rem; }
+  .tools { display:flex; flex-wrap:wrap; gap:.6rem; margin-bottom:.8rem; }
+  input, select { background:var(--panel); color:#eee; border:1px solid var(--line); border-radius:8px; padding:.55rem .7rem; font:inherit; }
+  input { flex:1; min-width:12rem; }
+  label { display:flex; align-items:center; gap:.4rem; color:#bbb; }
+  input:focus-visible, select:focus-visible, tr:focus-visible, a:focus-visible { outline:2px solid var(--g2); outline-offset:2px; }
+  .wrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:.9rem; }
+  th { text-align:left; color:var(--dim); font-weight:600; padding:.5rem; border-bottom:1px solid var(--line); }
+  td { padding:.5rem; border-bottom:1px solid var(--line); vertical-align:top; }
+  tr.row { cursor:pointer; } tr.row:hover { background:#141414; }
+  .pill { padding:.1rem .5rem; border-radius:999px; font-size:.75rem; font-weight:700; color:#000; }
+  .detail td { background:#0f0f0f; color:#cfcfcf; line-height:1.5; }
+  .detail code { color:var(--dim); font-size:.8rem; word-break:break-all; }
+  .charts { display:grid; grid-template-columns:repeat(auto-fit,minmax(18rem,1fr)); gap:.8rem; margin-bottom:1.2rem; }
+  .card h3 { margin:0 0 .6rem; font-size:.85rem; color:var(--dim); font-weight:600; }
+  svg { display:block; width:100%; height:auto; }
+  .donut { max-width:11rem; margin:0 auto; }
+  #legend { display:flex; flex-wrap:wrap; gap:.3rem .8rem; justify-content:center; margin-top:.6rem; font-size:.8rem; color:#bbb; }
+  #legend i { display:inline-block; width:.6rem; height:.6rem; border-radius:50%; margin-right:.3rem; }
+  ul.kev { list-style:none; margin:0; padding:0; font-size:.85rem; }
+  ul.kev li { padding:.35rem 0; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; gap:.6rem; }
+  ul.kev span { color:var(--dim); text-align:right; }
+  #banner { background:#2a2108; border:1px solid var(--med); color:var(--med); border-radius:8px; padding:.6rem .8rem; margin-bottom:1rem; font-size:.9rem; }
+  #msg { color:var(--dim); text-align:center; padding:2rem 0; }
+  footer { background:var(--panel); color:#aaa; font-size:.9rem; text-align:center; padding:10px 0; border-top:1px solid var(--line); }
+</style>
+</head>
+<body>
+<header>
+  <h1>CVE / CVSS Dashboard</h1>
+  <p class="meta"><a href="index.html">&larr; Back to BlitzThreat EEM</a> &middot; <span id="asof">Loading...</span></p>
+</header>
+<main>
+  <div id="banner" hidden>SAMPLE DATA: this is placeholder content so the layout can be previewed. Live NVD data replaces it after the first successful snapshot run.</div>
+  <div class="cards" id="cards"></div>
+  <div class="bar" id="bar" aria-hidden="true"></div>
+  <div class="charts">
+    <div class="card"><h3>Severity mix</h3><svg id="donut" class="donut" viewBox="0 0 120 120" role="img" aria-label="Severity mix"></svg><div id="legend"></div></div>
+    <div class="card"><h3>New CVEs per day</h3><svg id="days" viewBox="0 0 400 150" role="img" aria-label="New CVEs per day"></svg></div>
+    <div class="card"><h3>Recently added to CISA KEV</h3><ul class="kev" id="kevlist"></ul></div>
+  </div>
+  <div class="tools">
+    <input id="q" type="search" placeholder="Search CVE ID or description" aria-label="Search" />
+    <select id="sev" aria-label="Severity"><option value="">All severities</option><option>CRITICAL</option><option>HIGH</option><option>MEDIUM</option><option>LOW</option><option>UNSCORED</option></select>
+    <select id="sort" aria-label="Sort"><option value="risk">Sort: risk</option><option value="score">CVSS score</option><option value="epss">EPSS</option><option value="date">Newest</option></select>
+    <label><input id="kev" type="checkbox" /> Known exploited only</label>
+  </div>
+  <div class="wrap"><table>
+    <thead><tr><th>CVE</th><th>CVSS</th><th>Severity</th><th>EPSS</th><th>KEV</th><th>Published</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table></div>
+  <p id="msg" hidden></p>
+</main>
+<footer>
+  <div>&copy; 2026 BlitzWare Solutions LLC. All Rights Reserved</div>
+  <div>Data: NIST NVD, CISA KEV, FIRST EPSS &middot; Powered By OSINT</div>
+</footer>
+<script>
+/* Client-side gate for the demo flow only. Real access control needs the backend. */
+if (!sessionStorage.getItem("bt_session")) location.replace("index.html");
+
+const COLORS = { CRITICAL:"var(--crit)", HIGH:"var(--high)", MEDIUM:"var(--med)", LOW:"var(--low)", UNSCORED:"var(--uns)" };
+const $ = id => document.getElementById(id);
+const el = (t, cls, txt) => { const e = document.createElement(t); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+const ID_RE = /^CVE-\d{4}-\d{4,}$/;   // snapshot text is third-party data: only ever inserted with textContent
+let snap = null;
+
+function card(label, value, color) { const c = el("div", "card"); const b = el("b", null, value); if (color) b.style.color = color;
+  c.append(b, el("span", null, label)); return c; }
+
+function drawSummary() {
+  const k = snap.counts;
+  $("cards").replaceChildren(card(`CVEs, last ${snap.window_days} days`, snap.total), card("Critical", k.CRITICAL, COLORS.CRITICAL),
+    card("High", k.HIGH, COLORS.HIGH), card("Known exploited (in window)", snap.kev_in_window, COLORS.CRITICAL),
+    card("KEV added recently", snap.kev_recent.length));
+  $("bar").replaceChildren(...Object.keys(COLORS).filter(s => k[s]).map(s => {
+    const d = el("div"); d.style.flex = k[s]; d.style.background = COLORS[s]; d.title = `${s}: ${k[s]}`; return d; }));
+}
+
+const NS = "http://www.w3.org/2000/svg";
+const sv = (t, a) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); return e; };
+function drawCharts() {
+  const d = $("donut"), C = 2 * Math.PI * 42, tot = snap.total || 1; let off = 0;
+  d.replaceChildren(sv("circle", { cx:60, cy:60, r:42, fill:"none", stroke:"#1a1a1a", "stroke-width":16 }));
+  $("legend").replaceChildren();
+  Object.keys(COLORS).forEach(s => {
+    const n = snap.counts[s] || 0; if (!n) return;
+    const len = C * n / tot, c = sv("circle", { cx:60, cy:60, r:42, fill:"none", "stroke-width":16, transform:"rotate(-90 60 60)",
+      "stroke-dasharray":`${len} ${C - len}`, "stroke-dashoffset":-off, style:`stroke:${COLORS[s]}` });
+    c.append(sv("title", {})); c.firstChild.textContent = `${s}: ${n}`; d.append(c); off += len;
+    const li = el("span", null, `${s} ${n}`), dot = el("i"); dot.style.background = COLORS[s]; li.prepend(dot); $("legend").append(li);
+  });
+  const t1 = sv("text", { x:60, y:62, "text-anchor":"middle", "font-size":20, fill:"#eee" }); t1.textContent = snap.total;
+  const t2 = sv("text", { x:60, y:78, "text-anchor":"middle", "font-size":8, fill:"#777" }); t2.textContent = "CVEs";
+  d.append(t1, t2);
+
+  const g = $("days"), keys = Object.keys(snap.by_day || {}).sort(); g.replaceChildren();
+  if (keys.length) {
+    const sum = o => Object.values(o).reduce((a, b) => a + b, 0), max = Math.max(...keys.map(k => sum(snap.by_day[k])), 1);
+    const W = 400, H = 130, bw = W / keys.length;
+    keys.forEach((k, i) => { let y = H;
+      ["UNSCORED", "LOW", "MEDIUM", "HIGH", "CRITICAL"].forEach(s => {
+        const n = snap.by_day[k][s] || 0; if (!n) return; const hh = n / max * H; y -= hh;
+        const r = sv("rect", { x:i * bw + 2, y, width:bw - 4, height:hh, style:`fill:${COLORS[s]}` });
+        r.append(sv("title", {})); r.firstChild.textContent = `${k} ${s}: ${n}`; g.append(r); }); });
+    const a = sv("text", { x:0, y:146, "font-size":10, fill:"#777" }); a.textContent = keys[0];
+    const b = sv("text", { x:W, y:146, "font-size":10, fill:"#777", "text-anchor":"end" }); b.textContent = keys[keys.length - 1];
+    g.append(a, b);
+  }
+  $("kevlist").replaceChildren(...snap.kev_recent.slice(0, 8).map(k => {
+    const li = el("li"); li.append(el("div", null, k.id), el("span", null, `${k.vendor} ${k.product} \u00b7 ${k.added}`)); return li; }));
+  if (!snap.kev_recent.length) $("kevlist").append(el("li", null, "None in this window"));
+}
+
+function draw() {
+  const q = $("q").value.trim().toLowerCase(), sev = $("sev").value, kevOnly = $("kev").checked, sort = $("sort").value;
+  let list = snap.items.filter(i => (!sev || i.severity === sev) && (!kevOnly || i.kev) &&
+    (!q || i.id.toLowerCase().includes(q) || i.desc.toLowerCase().includes(q)));
+  const by = { risk:null, score:(a, b) => (b.score || 0) - (a.score || 0), epss:(a, b) => (b.epss || 0) - (a.epss || 0),
+    date:(a, b) => b.published.localeCompare(a.published) }[sort];
+  if (by) list = list.slice().sort(by);
+  $("rows").replaceChildren();
+  list.forEach(i => {
+    const tr = el("tr", "row"); tr.tabIndex = 0;
+    const pill = el("span", "pill", i.severity); pill.style.background = COLORS[i.severity] || COLORS.UNSCORED;
+    const sevCell = el("td"); sevCell.append(pill);
+    tr.append(el("td", null, i.id), el("td", null, i.score ?? "n/a"), sevCell,
+      el("td", null, i.epss == null ? "n/a" : (i.epss * 100).toFixed(1) + "%"), el("td", null, i.kev ? "Yes" : ""), el("td", null, i.published));
+    let open = null;
+    const toggle = () => {
+      if (open) { open.remove(); open = null; return; }
+      open = el("tr", "detail"); const td = el("td"); td.colSpan = 6;
+      td.append(el("div", null, i.desc || "No description."));
+      if (i.vector) td.append(el("code", null, `CVSS ${i.cvss}: ${i.vector}`));
+      if (ID_RE.test(i.id)) { const a = el("a", null, " View on NVD"); a.href = "https://nvd.nist.gov/vuln/detail/" + i.id;
+        a.target = "_blank"; a.rel = "noopener noreferrer"; td.append(el("br"), a); }
+      open.append(td); tr.after(open);
+    };
+    tr.addEventListener("click", toggle);
+    tr.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
+    $("rows").append(tr);
+  });
+  $("msg").hidden = list.length > 0; $("msg").textContent = "No CVEs match these filters.";
+}
+
+fetch("data/cve-snapshot.json", { cache:"no-cache" }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(s => {
+  snap = s;
+  if (!s.generated) { $("asof").textContent = "No data yet"; $("msg").hidden = false;
+    $("msg").textContent = "No snapshot yet. Run the 'Update CVE snapshot' workflow, or run scripts/fetch_cve.py locally."; return; }
+  $("asof").textContent = (s.sample ? "Sample snapshot " : "Snapshot ") + s.generated.replace("T", " ").replace("Z", " UTC");
+  drawSummary(); drawCharts(); draw(); $("banner").hidden = !s.sample;
+  ["q", "sev", "sort", "kev"].forEach(id => $(id).addEventListener("input", draw));
+}).catch(() => { $("asof").textContent = "Unavailable"; $("msg").hidden = false; $("msg").textContent = location.protocol === "file:" ? "Browsers block loading the data file from file://. Serve the folder (python3 -m http.server 8080 --bind 127.0.0.1) or use GitHub Pages." : "Could not load data/cve-snapshot.json. Check that the file exists in the repo."; });
+</script>
+</body>
+</html>
