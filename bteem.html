@@ -1,0 +1,209 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- Serve over HTTPS and also send these as real HTTP headers (meta CSP cannot set frame-ancestors/HSTS):
+     Strict-Transport-Security: max-age=31536000; includeSubDomains
+     X-Content-Type-Options: nosniff | Referrer-Policy: no-referrer | X-Frame-Options: DENY -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https:; base-uri 'none'; form-action 'self'" />
+<title>BlitzThreat EEM Launcher</title>
+<meta name="theme-color" content="#000000" />
+<style>
+  :root { --bg:#0a0a0a; --panel:#111; --line:#222; --dim:#777; --g1:#158044; --g2:#2aff88; --g3:#4cf29a; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; min-height:100%; background:var(--bg); color:#eee;
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; }
+  body { min-height:100dvh; display:flex; flex-direction:column; }
+  [hidden] { display:none !important; }
+  @keyframes radarReveal {
+    0% { color:#000; text-shadow:none; }
+    50% { color:var(--g1); text-shadow:0 0 4px rgba(21,128,68,.3); }
+    100% { color:var(--g2); text-shadow:0 0 10px rgba(42,255,136,.7),0 0 20px rgba(42,255,136,.5); }
+  }
+  @keyframes sweep { to { transform:rotate(360deg); } }
+  .title { font-size:3rem; font-weight:800; margin:0 0 .3rem; animation:radarReveal 6s ease-in-out infinite; }
+  .sub { color:var(--g3); text-shadow:0 0 5px rgba(76,242,154,.8),0 0 10px rgba(76,242,154,.5); margin:0 0 1.5rem; }
+  main { flex:1; text-align:center; padding:1rem; }
+  button { background:var(--g1); border:0; padding:.8rem 1.6rem; color:#000; font-weight:700; border-radius:8px;
+    cursor:pointer; font:inherit; font-weight:700; transition:background .3s; }
+  button:hover:not(:disabled) { background:var(--g2); }
+  button:focus-visible, input:focus-visible { outline:2px solid var(--g2); outline-offset:3px; }
+  button:disabled { background:#1b1b1b; color:#555; cursor:not-allowed; }
+  button[aria-pressed="true"] { background:var(--g2); }
+  .row { display:flex; justify-content:center; flex-wrap:wrap; gap:.8rem; margin-bottom:1.5rem; }
+  .hint { color:var(--dim); font-size:1rem; margin:0 auto 2rem; max-width:34rem; }
+  h2 { font-size:1rem; color:var(--dim); font-weight:600; margin:2rem 0 .8rem; }
+  .mod { background:transparent; border:1px solid var(--line); color:#555; padding:.5rem 1rem; font-weight:600; }
+  footer { background:var(--panel); color:#aaa; font-size:.9rem; text-align:center; padding:10px 0; border-top:1px solid var(--line); }
+
+  /* Splash / login */
+  #splash { position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:1rem; padding:1rem; z-index:10; text-align:center; }
+  .radar { width:120px; height:120px; border-radius:50%; border:1px solid var(--g1);
+    background:radial-gradient(circle,transparent 30%,rgba(21,128,68,.25) 31%,transparent 32%,transparent 60%,rgba(21,128,68,.25) 61%,transparent 62%);
+    position:relative; overflow:hidden; box-shadow:0 0 20px rgba(42,255,136,.25); }
+  .radar::after { content:""; position:absolute; inset:0; border-radius:50%;
+    background:conic-gradient(from 0deg,rgba(42,255,136,.7),transparent 25%); animation:sweep 3s linear infinite; }
+  .card { width:100%; max-width:22rem; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:1.5rem; }
+  .card button { width:100%; margin-top:.8rem; }
+  .card .alt { background:transparent; border:1px solid var(--g1); color:var(--g3); }
+  .note { color:var(--dim); font-size:.8rem; margin:.8rem 0 0; }
+  #err { color:#ff6b6b; font-size:.9rem; min-height:1.2em; margin:.5rem 0 0; }
+  @media (max-width:600px) { .title { font-size:2rem; } button { padding:.6rem 1.2rem; font-size:.9rem; } }
+  @media (prefers-reduced-motion:reduce) { .title, .radar::after { animation:none; color:var(--g2); } }
+</style>
+</head>
+<body>
+
+<!-- Log-on splash -->
+<div id="splash">
+  <div class="radar" aria-hidden="true"></div>
+  <h1 class="title">BlitzThreat EEM</h1>
+  <div class="card">
+    <button id="ssoBtn">Sign in with SSO</button>
+    <button id="demoBtn" class="alt" hidden>Continue in demo mode</button>
+    <p id="err" role="alert"></p>
+    <p class="note" id="modeNote"></p>
+  </div>
+</div>
+
+<main id="app" hidden>
+  <h1 class="title">BlitzThreat EEM</h1>
+  <div class="sub" id="mapName" aria-live="polite"></div>
+  <p class="hint">Swipe left/right or use the ◀ ▶ keys to switch maps. Tap a map again, press Enter, or use Open map to launch it in a new tab.</p>
+  <div class="row" id="buttons"></div>
+  <div class="row"><button id="openBtn">Open map</button><button id="outBtn" class="alt" style="background:transparent;border:1px solid var(--g1);color:var(--g3)">Sign out</button></div>
+
+  <h2>Coming to the suite</h2>
+  <div class="row">
+    <button class="mod" disabled>Incident Response</button>
+    <button class="mod" disabled>CVE / CVSS</button>
+    <button class="mod" disabled>Telemetry</button>
+    <button class="mod" disabled>App Logs</button>
+    <button class="mod" disabled>BlitzGate</button>
+  </div>
+</main>
+
+<footer>
+  <div>&copy; 2026 BlitzWare Solutions LLC. All Rights Reserved</div>
+  <div>Powered By OSINT</div>
+</footer>
+
+<script>
+/* ---------- SSO config (OIDC Authorization Code + PKCE) ----------
+   Fill these from your IdP (Entra ID, Okta, Keycloak, Auth0...). Leave clientId empty for demo mode.
+   Register the redirectUri exactly as the app is hosted, and it must be https. */
+const CFG = {
+  authorizeUrl: "",   // e.g. https://login.example.com/oauth2/v2.0/authorize
+  tokenUrl: "",       // e.g. https://login.example.com/oauth2/v2.0/token
+  clientId: "",
+  scope: "openid profile email",
+  redirectUri: location.origin + location.pathname
+};
+const SSO_ON = !!(CFG.authorizeUrl && CFG.tokenUrl && CFG.clientId);
+
+const maps = [
+  { name: "Fortinet Threat Map",    short: "Fortinet",    url: "https://threatmap.fortiguard.com/" },
+  { name: "Bitdefender Threat Map", short: "Bitdefender", url: "https://threatmap.bitdefender.com/" },
+  { name: "Kaspersky Cyber Map",    short: "Kaspersky",   url: "https://cybermap.kaspersky.com/" },
+  { name: "Check Point Live Cyber Threat Map", short: "Check Point", url: "https://threatmap.checkpoint.com/" },
+  { name: "Radware Live Threat Map", short: "Radware",    url: "https://livethreatmap.radware.com/" }
+];
+
+const $ = id => document.getElementById(id);
+let current = 0;
+
+/* ---------- Session ---------- */
+const getSession = () => { try { return JSON.parse(sessionStorage.getItem("bt_session")); } catch { return null; } };
+const setSession = s => sessionStorage.setItem("bt_session", JSON.stringify(s));
+
+function showApp(show) { $("splash").hidden = show; $("app").hidden = !show; }
+
+/* ---------- PKCE helpers ---------- */
+const b64url = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const rand = () => b64url(crypto.getRandomValues(new Uint8Array(32)));
+
+async function startSSO() {
+  const verifier = rand(), state = rand();
+  const challenge = b64url(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier)));
+  sessionStorage.setItem("bt_pkce", JSON.stringify({ verifier, state }));
+  const p = new URLSearchParams({ response_type:"code", client_id:CFG.clientId, redirect_uri:CFG.redirectUri,
+    scope:CFG.scope, state, code_challenge:challenge, code_challenge_method:"S256" });
+  location.assign(CFG.authorizeUrl + "?" + p);
+}
+
+async function finishSSO(code, state) {
+  const saved = JSON.parse(sessionStorage.getItem("bt_pkce") || "null");
+  sessionStorage.removeItem("bt_pkce");
+  history.replaceState({}, "", location.pathname);           // strip code from the URL
+  if (!saved || saved.state !== state) throw new Error("Sign-in state mismatch. Please try again.");
+  const res = await fetch(CFG.tokenUrl, { method:"POST",
+    headers:{ "Content-Type":"application/x-www-form-urlencoded" },
+    body:new URLSearchParams({ grant_type:"authorization_code", code, client_id:CFG.clientId,
+      redirect_uri:CFG.redirectUri, code_verifier:saved.verifier }) });
+  if (!res.ok) throw new Error("Token exchange failed (" + res.status + ").");
+  const tok = await res.json();
+  // UI hint only: validate the signature/issuer/audience/nonce on a backend before trusting any claim.
+  let name = "User";
+  try { name = JSON.parse(atob(tok.id_token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/"))).name || name; } catch {}
+  setSession({ name, mode:"sso", at:Date.now() });
+}
+
+/* ---------- Map selection ---------- */
+function render() {
+  $("mapName").textContent = maps[current].name;
+  document.querySelectorAll("#buttons button").forEach((b, i) => b.setAttribute("aria-pressed", i === current));
+}
+function openMap(i) { window.open(maps[i].url, "_blank", "noopener,noreferrer"); }
+function step(d) { current = (current + d + maps.length) % maps.length; render(); }
+
+maps.forEach((m, i) => {
+  const b = document.createElement("button");
+  b.textContent = m.short;
+  b.addEventListener("click", () => { if (current === i) openMap(i); else { current = i; render(); } });
+  $("buttons").appendChild(b);
+});
+$("openBtn").addEventListener("click", () => openMap(current));
+$("outBtn").addEventListener("click", () => { sessionStorage.removeItem("bt_session"); showApp(false); });
+
+/* Swipe: horizontal only, ignores vertical scrolling */
+let sx = 0, sy = 0;
+document.addEventListener("touchstart", e => { sx = e.changedTouches[0].clientX; sy = e.changedTouches[0].clientY; }, { passive:true });
+document.addEventListener("touchend", e => {
+  if ($("app").hidden) return;
+  const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+  if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.5) step(dx < 0 ? 1 : -1);
+}, { passive:true });
+
+document.addEventListener("keydown", e => {
+  if ($("app").hidden) return;
+  if (e.key === "ArrowLeft") step(-1);
+  else if (e.key === "ArrowRight") step(1);
+  else if (e.key === "Enter" && !(e.target instanceof HTMLButtonElement)) openMap(current);
+});
+
+/* ---------- Boot ---------- */
+$("ssoBtn").hidden = !SSO_ON;
+$("demoBtn").hidden = SSO_ON;
+$("modeNote").textContent = SSO_ON
+  ? "Your organization's identity provider handles sign-in."
+  : "SSO is not configured. Demo mode is a UI preview only and provides no security.";
+$("ssoBtn").addEventListener("click", () => startSSO().catch(e => $("err").textContent = e.message));
+$("demoBtn").addEventListener("click", () => { setSession({ name:"Demo", mode:"demo", at:Date.now() }); showApp(true); });
+
+(async () => {
+  const q = new URLSearchParams(location.search);
+  try {
+    if (SSO_ON && q.get("code")) await finishSSO(q.get("code"), q.get("state"));
+    else if (q.get("error")) $("err").textContent = "Sign-in was not completed: " + q.get("error");
+  } catch (e) { $("err").textContent = e.message; }
+  if (location.protocol === "http:" && location.hostname !== "localhost")
+    $("err").textContent = "This page is not using HTTPS. Sign-in is disabled.", $("ssoBtn").disabled = true;
+  render();
+  showApp(!!getSession());
+})();
+</script>
+</body>
+</html>
