@@ -1,203 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>BlitzThreat EEM Launcher</title>
-  <meta name="theme-color" content="#000000" />
-  <style>
-    html, body {
-      margin: 0; padding: 0;
-      height: 100%; width: 100%;
-      background: #0a0a0a;
-      color: #eee;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      overflow: hidden;
-      user-select: none;
-      display: block; /* Remove flex */
-    }
-
-    .container {
-      text-align: center;
-      margin-top: 0.5rem; /* small space from top */
-    }
-
-    @keyframes radarReveal {
-      0% {
-        color: #000;
-        text-shadow: none;
-      }
-      50% {
-        color: #158044;
-        text-shadow: 0 0 4px rgba(21, 128, 68, 0.3);
-      }
-      100% {
-        color: #2aff88;
-        text-shadow:
-          0 0 10px rgba(42, 255, 136, 0.7),
-          0 0 20px rgba(42, 255, 136, 0.5);
-      }
-    }
-    #pageTitle {
-      font-size: 3rem;
-      font-weight: 800;
-      animation: radarReveal 6s ease-in-out infinite;
-      margin: 0 0 0.3rem 0;
-    }
-    #mapName {
-      font-size: 1.2rem;
-      margin: 0 0 2rem 0;
-      color: #4cf29a;
-      text-shadow:
-        0 0 5px rgba(76, 242, 154, 0.8),
-        0 0 10px rgba(76, 242, 154, 0.5);
-    }
-    #instructions {
-      font-size: 1rem;
-      color: #777;
-      margin-bottom: 3rem;
-      user-select: none;
-    }
-    #footer {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      background: #111;
-      color: #aaa;
-      font-size: 0.9rem;
-      text-align: center;
-      padding: 10px 0;
-      border-top: 1px solid #222;
-      user-select: none;
-    }
-    button {
-      background: #158044;
-      border: none;
-      padding: 0.8rem 2rem;
-      margin: 0 0.5rem;
-      color: #000;
-      font-weight: 700;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-      user-select: none;
-    }
-    button:hover {
-      background: #2aff88;
-      color: #000;
-    }
-    #buttonContainer {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 2rem;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    @media (max-width: 600px) {
-      #pageTitle {
-        font-size: 2rem;
-      }
-      button {
-        padding: 0.6rem 1.5rem;
-        font-size: 0.9rem;
-      }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BlitzThreat EEM | BlitzWare Solutions</title>
+<meta name="description" content="BlitzThreat EEM: threat maps, incident response, CVE tracking and telemetry from BlitzWare Solutions." />
+<meta name="theme-color" content="#000000" />
+<style>
+  :root { --g1:#158044; --g2:#2aff88; --g3:#4cf29a; }
+  * { box-sizing:border-box; }
+  body { margin:0; min-height:100dvh; display:flex; flex-direction:column; background:#0a0a0a; color:#eee;
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; }
+  main { flex:1; max-width:46rem; width:100%; margin:0 auto; padding:2rem 1rem; }
+  h1 { font-size:2.6rem; font-weight:800; margin:0 0 .3rem; color:var(--g2);
+    text-shadow:0 0 10px rgba(42,255,136,.7),0 0 20px rgba(42,255,136,.5); }
+  .tag { color:var(--g3); margin:0 0 2rem; }
+  p, li { line-height:1.6; color:#cfcfcf; }
+  h2 { font-size:1.2rem; margin:2rem 0 .5rem; color:#eee; }
+  .row { display:flex; flex-wrap:wrap; gap:.8rem; margin-top:2rem; }
+  a.btn { background:var(--g1); color:#000; font-weight:700; padding:.8rem 1.6rem; border-radius:8px; text-decoration:none; }
+  a.btn:hover { background:var(--g2); }
+  a.btn.alt { background:transparent; border:1px solid var(--g1); color:var(--g3); }
+  a:focus-visible { outline:2px solid var(--g2); outline-offset:3px; }
+  footer { background:#111; color:#aaa; font-size:.9rem; text-align:center; padding:10px 0; border-top:1px solid #222; }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1 id="pageTitle">BlitzThreat EEM</h1>
-    <div id="mapName">Fortinet Threat Map</div>
-    <div id="instructions">
-      Swipe left/right or use ◀ ▶ arrow keys to switch maps.<br />
-      Double-Tap a button or press Enter to open the selected map.
-    </div>
+<main>
+  <h1>BlitzThreat EEM</h1>
+  <p class="tag">Environmental Event Management</p>
+  <p>BlitzThreat Environmental Event Management, also called BTEEM, brings live threat intelligence, incident response, vulnerability tracking and telemetry into one place. It is part of the BlitzWare Solutions security suite.</p>
 
-    <div id="buttonContainer">
-      <button data-index="0">Fortinet</button>
-      <button data-index="1">Bitdefender</button>
-      <button data-index="2">Kaspersky</button>
-    </div>
+  <h2>In the demo today</h2>
+  <ul>
+    <li>Sign-in splash with optional SSO</li>
+    <li>Launcher for five public threat maps: Fortinet, Bitdefender, Kaspersky, Check Point and Radware</li>
+    <li>CVE and CVSS viewer</li>
+  </ul>
+
+  <h2>Coming next</h2>
+  <ul>
+    <li>Incident response portal</li>
+    <li>Telemetry dashboard and connected-app logs</li>
+    <li>SIEM, and BlitzGate data governance for BlitzRAG (PII, PHI, ePHI checks)</li>
+  </ul>
+
+  <div class="row">
+    <!-- Update this URL if the demo repository or path changes -->
+    <a class="btn" href="https://blitzwaresolutions.github.io/bws/bteem.html">Launch the demo</a>
+    <a class="btn alt" href="solutions.html">Back to Solutions</a>
   </div>
-
-  <div id="footer">
-    <div>&copy; 2026 BlitzWare Solutions. All Rights Reserved.</div>
-    <div>Powered By OSINT</div>
-  </div>
-
-  <script>
-    const maps = [
-      { name: "Fortinet Threat Map", url: "https://threatmap.fortiguard.com/" },
-      { name: "Bitdefender Threat Map", url: "https://threatmap.bitdefender.com/" },
-      { name: "Kaspersky Cyber Map", url: "https://cybermap.kaspersky.com/" }
-    ];
-
-    let currentIndex = 0;
-
-    const mapName = document.getElementById("mapName");
-    const buttons = document.querySelectorAll("#buttonContainer button");
-
-    function updateUI() {
-      mapName.textContent = maps[currentIndex].name;
-      buttons.forEach((btn, idx) => {
-        btn.style.backgroundColor = idx === currentIndex ? "#2aff88" : "#158044";
-        btn.style.color = "#000";
-      });
-    }
-
-    function openMap(index) {
-      window.location.href = maps[index].url;
-    }
-
-    buttons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        currentIndex = parseInt(btn.getAttribute("data-index"));
-        updateUI();
-      });
-      btn.addEventListener("dblclick", () => {
-        openMap(parseInt(btn.getAttribute("data-index")));
-      });
-    });
-
-    // Swipe detection
-    let touchStartX = 0;
-    let touchEndX = 0;
-
-    function handleGesture() {
-      if (touchEndX < touchStartX - 40) {
-        currentIndex = (currentIndex + 1) % maps.length;
-        updateUI();
-      }
-      if (touchEndX > touchStartX + 40) {
-        currentIndex = (currentIndex - 1 + maps.length) % maps.length;
-        updateUI();
-      }
-    }
-
-    document.addEventListener('touchstart', e => {
-      touchStartX = e.changedTouches[0].screenX;
-    });
-
-    document.addEventListener('touchend', e => {
-      touchEndX = e.changedTouches[0].screenX;
-      handleGesture();
-    });
-
-    // Keyboard navigation
-    document.addEventListener('keydown', e => {
-      if (e.key === "ArrowLeft") {
-        currentIndex = (currentIndex - 1 + maps.length) % maps.length;
-        updateUI();
-      } else if (e.key === "ArrowRight") {
-        currentIndex = (currentIndex + 1) % maps.length;
-        updateUI();
-      } else if (e.key === "Enter") {
-        openMap(currentIndex);
-      }
-    });
-
-    // Initialize UI on load
-    updateUI();
-  </script>
+</main>
+<footer>
+  <div>&copy; 2026 <a href="https://BlitzWareSolutions.github.io/bws">BlitzWare Solutions LLC</a> All Rights Reserved</div>
+  <div>Powered By OSINT</div>
+</footer>
 </body>
 </html>
