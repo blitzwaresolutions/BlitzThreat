@@ -80,7 +80,7 @@
 </footer>
 <script>
 /* Client-side gate for the demo flow only. Real access control needs the backend. */
-if (!sessionStorage.getItem("bt_session")) location.replace("index.html");
+if (!sessionStorage.getItem("bt_session")) location.replace("bteem.html");
 
 const COLORS = { CRITICAL:"var(--crit)", HIGH:"var(--high)", MEDIUM:"var(--med)", LOW:"var(--low)", UNSCORED:"var(--uns)" };
 const $ = id => document.getElementById(id);
