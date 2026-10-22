@@ -1,9 +1,10 @@
 <!DOCTYPE html>
+<!-- BlitzThreat EEM CVE dashboard BTEEM_BASE2_102226a -->
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self'; base-uri 'none'; form-action 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://services.nvd.nist.gov https://api.first.org; base-uri 'none'; form-action 'none'" />
 <title>BlitzThreat EEM - CVE Dashboard</title>
 <meta name="theme-color" content="#000000" />
 <style>
@@ -43,18 +44,27 @@
   ul.kev { list-style:none; margin:0; padding:0; font-size:.85rem; }
   ul.kev li { padding:.35rem 0; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; gap:.6rem; }
   ul.kev span { color:var(--dim); text-align:right; }
-  #banner { background:#2a2108; border:1px solid var(--med); color:var(--med); border-radius:8px; padding:.6rem .8rem; margin-bottom:1rem; font-size:.9rem; }
+  #banner, #warn { background:#2a2108; border:1px solid var(--med); color:var(--med); border-radius:8px; padding:.6rem .8rem; margin-bottom:1rem; font-size:.9rem; }
+  button { background:var(--g1); border:0; color:#000; font:inherit; font-weight:700; padding:.55rem 1.1rem; border-radius:8px; cursor:pointer; }
+  button:hover:not(:disabled) { background:var(--g2); } button:disabled { background:#1b1b1b; color:#555; }
+  .fresh { display:flex; flex-wrap:wrap; align-items:center; gap:.5rem .9rem; font-size:.85rem; color:var(--dim); margin-bottom:1rem; }
+  .chip { border:1px solid var(--line); border-radius:999px; padding:.15rem .65rem; }
+  .chip.ok { border-color:var(--g1); color:var(--g3); } .chip.warn { border-color:var(--med); color:var(--med); } .chip.bad { border-color:var(--crit); color:var(--crit); }
+  .look { display:flex; flex-wrap:wrap; gap:.6rem; } .look input { flex:1; min-width:12rem; }
+  .lbox div { margin:.35rem 0; line-height:1.5; } .src { color:var(--dim); font-size:.8rem; } p.bad { color:var(--crit); } p.warn { color:var(--med); }
   #msg { color:var(--dim); text-align:center; padding:2rem 0; }
   footer { background:var(--panel); color:#aaa; font-size:.9rem; text-align:center; padding:10px 0; border-top:1px solid var(--line); }
 </style>
 </head>
 <body>
 <header>
-  <h1>CVE/CVSS Dashboard</h1>
-  <p class="meta"><a href="bteem.html">&larr; Back to BlitzThreat EEM</a> &middot; <span id="asof">Loading...</span></p>
+  <h1>CVE / CVSS Dashboard</h1>
+  <p class="meta"><a href="bteem.html">&larr; Home</a> &middot; <span id="asof">Loading...</span></p>
 </header>
 <main>
   <div id="banner" hidden>SAMPLE DATA: this is placeholder content so the layout can be previewed. Live NVD data replaces it after the first successful snapshot run.</div>
+  <div id="warn" hidden></div>
+  <div class="fresh" id="fresh"></div>
   <div class="cards" id="cards"></div>
   <div class="bar" id="bar" aria-hidden="true"></div>
   <div class="charts">
@@ -62,21 +72,24 @@
     <div class="card"><h3>New CVEs per day</h3><svg id="days" viewBox="0 0 400 150" role="img" aria-label="New CVEs per day"></svg></div>
     <div class="card"><h3>Recently added to CISA KEV</h3><ul class="kev" id="kevlist"></ul></div>
   </div>
+  <div class="card" style="margin-bottom:1rem"><h3>Look up a CVE (live)</h3>
+    <div class="look"><input id="lq" placeholder="CVE-2025-12345" aria-label="CVE ID" autocomplete="off" spellcheck="false" /><button id="lgo" type="button">Look up</button></div>
+    <div id="lres" class="lbox" aria-live="polite"></div></div>
   <div class="tools">
     <input id="q" type="search" placeholder="Search CVE ID or description" aria-label="Search" />
     <select id="sev" aria-label="Severity"><option value="">All severities</option><option>CRITICAL</option><option>HIGH</option><option>MEDIUM</option><option>LOW</option><option>UNSCORED</option></select>
-    <select id="sort" aria-label="Sort"><option value="risk">Sort: risk</option><option value="score">CVSS score</option><option value="epss">EPSS</option><option value="date">Newest</option></select>
+    <select id="sort" aria-label="Sort"><option value="risk">Sort: risk</option><option value="score">CVSS score</option><option value="epss">EPSS</option><option value="date">Newest</option><option value="mod">Recently modified</option></select>
     <label><input id="kev" type="checkbox" /> Known exploited only</label>
   </div>
   <div class="wrap"><table>
-    <thead><tr><th>CVE</th><th>CVSS</th><th>Severity</th><th>EPSS</th><th>KEV</th><th>Published</th></tr></thead>
+    <thead><tr><th>CVE</th><th>CVSS</th><th>Severity</th><th>EPSS</th><th>KEV</th><th>Published</th><th>Modified</th></tr></thead>
     <tbody id="rows"></tbody>
   </table></div>
   <p id="msg" hidden></p>
 </main>
 <footer>
   <div>&copy; 2026 <a href="https://BlitzWareSolutions.github.io/bws">BlitzWare Solutions LLC</a> All Rights Reserved</div>
-  <div>Data: NIST NVD, CISA KEV, FIRST EPSS &middot; Powered By OSINT</div>
+  <div>Powered By OSINT</div>
 </footer>
 <script>
 /* Client-side gate for the demo flow only. Real access control needs the backend. */
@@ -93,7 +106,7 @@ function card(label, value, color) { const c = el("div", "card"); const b = el("
 
 function drawSummary() {
   const k = snap.counts;
-  $("cards").replaceChildren(card(`CVEs, last ${snap.window_days} days`, snap.total), card("Critical", k.CRITICAL, COLORS.CRITICAL),
+  $("cards").replaceChildren(card("CVEs tracked", snap.total), card("Critical", k.CRITICAL, COLORS.CRITICAL),
     card("High", k.HIGH, COLORS.HIGH), card("Known exploited (in window)", snap.kev_in_window, COLORS.CRITICAL),
     card("KEV added recently", snap.kev_recent.length));
   $("bar").replaceChildren(...Object.keys(COLORS).filter(s => k[s]).map(s => {
@@ -140,7 +153,7 @@ function draw() {
   let list = snap.items.filter(i => (!sev || i.severity === sev) && (!kevOnly || i.kev) &&
     (!q || i.id.toLowerCase().includes(q) || i.desc.toLowerCase().includes(q)));
   const by = { risk:null, score:(a, b) => (b.score || 0) - (a.score || 0), epss:(a, b) => (b.epss || 0) - (a.epss || 0),
-    date:(a, b) => b.published.localeCompare(a.published) }[sort];
+    date:(a, b) => b.published.localeCompare(a.published), mod:(a, b) => (b.modified || "").localeCompare(a.modified || "") }[sort];
   if (by) list = list.slice().sort(by);
   $("rows").replaceChildren();
   list.forEach(i => {
@@ -148,13 +161,14 @@ function draw() {
     const pill = el("span", "pill", i.severity); pill.style.background = COLORS[i.severity] || COLORS.UNSCORED;
     const sevCell = el("td"); sevCell.append(pill);
     tr.append(el("td", null, i.id), el("td", null, i.score ?? "n/a"), sevCell,
-      el("td", null, i.epss == null ? "n/a" : (i.epss * 100).toFixed(1) + "%"), el("td", null, i.kev ? "Yes" : ""), el("td", null, i.published));
+      el("td", null, i.epss == null ? "n/a" : (i.epss * 100).toFixed(1) + "%"), el("td", null, i.kev ? "Yes" : ""), el("td", null, i.published), el("td", null, i.modified || ""));
     let open = null;
     const toggle = () => {
       if (open) { open.remove(); open = null; return; }
-      open = el("tr", "detail"); const td = el("td"); td.colSpan = 6;
+      open = el("tr", "detail"); const td = el("td"); td.colSpan = 7;
       td.append(el("div", null, i.desc || "No description."));
       if (i.vector) td.append(el("code", null, `CVSS ${i.cvss}: ${i.vector}`));
+      detailLines(i).forEach(l => td.append(el("div", null, l)));
       if (ID_RE.test(i.id)) { const a = el("a", null, " View on NVD"); a.href = "https://nvd.nist.gov/vuln/detail/" + i.id;
         a.target = "_blank"; a.rel = "noopener noreferrer"; td.append(el("br"), a); }
       open.append(td); tr.after(open);
@@ -166,14 +180,112 @@ function draw() {
   $("msg").hidden = list.length > 0; $("msg").textContent = "No CVEs match these filters.";
 }
 
+/* ---------- freshness, detail lines, live lookup ---------- */
+const NVD_API = "https://services.nvd.nist.gov/rest/json/cves/2.0", EPSS_API = "https://api.first.org/data/v1/epss";
+let ingestStatus = null, kevCat = null;
+const chip = (t, k) => el("span", "chip " + k, t);
+const ago = iso => { const h = (Date.now() - Date.parse(iso)) / 36e5; return h < 1 ? "under an hour ago" : h < 48 ? Math.round(h) + " h ago" : Math.round(h / 24) + " days ago"; };
+const when = d => d.toISOString().replace("T", " ").slice(0, 19) + " UTC";
+
+function drawFresh() {
+  const f = $("fresh"), w = $("warn"), msgs = []; f.replaceChildren();
+  f.append(chip(snap.sample ? "Sample data" : "Live data", snap.sample ? "warn" : "ok"));
+  if (snap.generated) f.append(el("span", null, "Updated " + snap.generated.replace("T", " ").replace("Z", " UTC") + " (" + ago(snap.generated) + ")"));
+  const ss = snap.source_status || {};
+  [["nvd", "NVD"], ["kev", "KEV"], ["epss", "EPSS"]].forEach(([k, l]) => {
+    const s = ss[k]; if (!s) return;
+    const c = chip(l + ": " + s.status, s.status === "ok" ? "ok" : s.status === "failed" ? "bad" : "warn");
+    c.title = [s.message, s.source_updated && "Source date: " + s.source_updated, s.fetched && "Fetched: " + s.fetched].filter(Boolean).join(" | ");
+    f.append(c);
+    if (s.status !== "ok") msgs.push(l + " data is " + s.status + (s.message ? " (" + s.message + ")" : "") + ".");
+  });
+  if (!snap.sample && snap.generated && Date.now() - Date.parse(snap.generated) > 48 * 36e5) msgs.push("The snapshot is more than 48 hours old; the daily refresh may be failing.");
+  if (ingestStatus && ingestStatus.result === "failed") msgs.push("The last refresh attempt (" + ingestStatus.attempted + ") failed: " + ingestStatus.message + " Showing the last good snapshot.");
+  w.hidden = !msgs.length; w.textContent = msgs.join(" ");
+}
+
+function detailLines(i) {
+  const L = []; if (i.modified) L.push("Last modified " + i.modified);
+  if (i.kev) L.push("CISA KEV: added " + (i.kev_added || "n/a") + (i.kev_due ? ", due " + i.kev_due : "") + (i.kev_ransomware ? ", known ransomware use" : ""));
+  if (i.epss != null) L.push("EPSS " + (i.epss * 100).toFixed(2) + "%" + (i.epss_date ? " as of " + i.epss_date : ""));
+  L.push("Sources: " + ((snap.sources || []).join(", ") || "n/a")); return L;
+}
+
+async function getJSON(url) {
+  const ac = new AbortController(), t = setTimeout(() => ac.abort(), 12000);
+  try { const r = await fetch(url, { signal: ac.signal, headers: { Accept: "application/json" } });
+    if (!r.ok) { const e = new Error("HTTP " + r.status); e.status = r.status; throw e; } return await r.json(); }
+  finally { clearTimeout(t); }
+}
+async function loadKev() { if (!kevCat) kevCat = await getJSON("data/kev-catalog.json"); return kevCat; }
+
+function normNVD(v) {
+  const c = v.cve; if (c.vulnStatus === "Rejected") return null;
+  const d = (c.descriptions || []).find(x => x.lang === "en"); let score = null, sev = "UNSCORED", ver = null, vec = null;
+  for (const [k, l] of [["cvssMetricV40", "4.0"], ["cvssMetricV31", "3.1"], ["cvssMetricV30", "3.0"], ["cvssMetricV2", "2.0"]]) {
+    const m = (c.metrics || {})[k];
+    if (m && m[0]) { const x = m[0].cvssData || {}; score = x.baseScore ?? null; ver = l; vec = x.vectorString || null;
+      sev = String(x.baseSeverity || m[0].baseSeverity || "").toUpperCase(); break; } }
+  if (!(sev in COLORS)) sev = "UNSCORED";
+  return { id: c.id, published: (c.published || "").slice(0, 10), modified: (c.lastModified || "").slice(0, 10), score, severity: sev, cvss: ver, vector: vec, desc: d ? d.value : "" };
+}
+
+async function lookup() {
+  const id = $("lq").value.trim().toUpperCase(), out = $("lres"); out.replaceChildren();
+  if (!ID_RE.test(id)) { out.append(el("p", "bad", "Enter a CVE ID in the form CVE-YYYY-NNNN.")); return; }
+  out.append(el("p", null, "Looking up " + id + "...")); $("lgo").disabled = true;
+  let rec = null, err = null;
+  try {
+    const v = ((await getJSON(NVD_API + "?cveId=" + encodeURIComponent(id))).vulnerabilities || [])[0];
+    rec = v ? normNVD(v) : null;
+    if (rec) rec.src = "NIST NVD, retrieved live " + when(new Date());
+    else err = "NVD has no record for " + id + " (it may be invalid, reserved, rejected or not yet published).";
+  } catch (e) {
+    err = e.name === "AbortError" ? "NVD did not respond in time."
+      : e.status === 403 || e.status === 429 ? "NVD rate limit reached; try again in a minute."
+      : e.status ? "NVD is unavailable (HTTP " + e.status + ")."
+      : "The browser could not reach NVD (network error, or the request was blocked by the source's CORS policy).";
+    const s = snap && snap.items.find(i => i.id === id);
+    if (s) rec = { ...s, src: "FROM SNAPSHOT dated " + snap.generated + ". The live lookup failed, so this is cached data, not freshly retrieved." };
+  }
+  if (rec) {
+    try { const e = ((await getJSON(EPSS_API + "?cve=" + id)).data || [])[0];
+      if (e) { rec.epss = parseFloat(e.epss); rec.epss_date = e.date; rec.epssSrc = "FIRST EPSS, retrieved live " + when(new Date()); }
+      else { rec.epss = null; rec.epssSrc = "FIRST EPSS has no score for this CVE"; } }
+    catch { rec.epssSrc = rec.epss != null ? "from snapshot; live EPSS lookup failed" : "EPSS lookup failed"; }
+    try { const k = await loadKev(), e = k.entries.find(x => x.id === id);
+      rec.kevTxt = e ? "Yes. Added " + e.added + (e.due ? ", due " + e.due : "") + (e.ransomware ? ", known ransomware use." : ".") : "Not in the CISA KEV catalog.";
+      rec.kevSrc = "catalog released " + (k.released || "unknown date"); }
+    catch { rec.kevTxt = "KEV status unavailable (catalog file could not be loaded)."; rec.kevSrc = ""; }
+  }
+  out.replaceChildren();
+  if (err) out.append(el("p", rec ? "warn" : "bad", err));
+  if (rec) {
+    const box = el("div"), t = el("div", null, rec.id + " "), p = el("span", "pill", rec.severity);
+    p.style.background = COLORS[rec.severity] || COLORS.UNSCORED; t.append(p);
+    box.append(t, el("div", null, rec.desc || "No description."),
+      el("div", null, "CVSS " + (rec.score ?? "n/a") + (rec.cvss ? " (v" + rec.cvss + ")" : "") + (rec.vector ? " " + rec.vector : "")),
+      el("div", null, "Published " + rec.published + ", last modified " + (rec.modified || "n/a")),
+      el("div", null, "CISA KEV: " + rec.kevTxt + (rec.kevSrc ? " [" + rec.kevSrc + "]" : "")),
+      el("div", null, "EPSS: " + (rec.epss == null ? "n/a" : (rec.epss * 100).toFixed(2) + "%" + (rec.epss_date ? " (score date " + rec.epss_date + ")" : "")) + " [" + rec.epssSrc + "]"),
+      el("div", "src", "Source: " + rec.src));
+    out.append(box);
+  }
+  $("lgo").disabled = false;
+}
+
+fetch("data/ingest-status.json", { cache: "no-cache" }).then(r => r.ok ? r.json() : null).then(j => { ingestStatus = j; if (snap && snap.generated) drawFresh(); }).catch(() => {});
+
 fetch("data/cve-snapshot.json", { cache:"no-cache" }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(s => {
   snap = s;
   if (!s.generated) { $("asof").textContent = "No data yet"; $("msg").hidden = false;
     $("msg").textContent = "No snapshot yet. Run the 'Update CVE snapshot' workflow, or run scripts/fetch_cve.py locally."; return; }
   $("asof").textContent = (s.sample ? "Sample snapshot " : "Snapshot ") + s.generated.replace("T", " ").replace("Z", " UTC");
-  drawSummary(); drawCharts(); draw(); $("banner").hidden = !s.sample;
+  drawSummary(); drawCharts(); draw(); drawFresh(); $("banner").hidden = !s.sample;
   ["q", "sev", "sort", "kev"].forEach(id => $(id).addEventListener("input", draw));
-}).catch(() => { $("asof").textContent = "Unavailable"; $("msg").hidden = false; $("msg").textContent = location.protocol === "file:" ? "Browsers block loading the data file from file://. Serve the folder (python3 -m http.server 8080 --bind 127.0.0.1) or use GitHub Pages." : "Could not load data/cve-snapshot.json. Check that the file exists in the repo."; });
+}).catch(err => { console.error(err); $("asof").textContent = "Unavailable"; $("msg").hidden = false; $("msg").textContent = location.protocol === "file:" ? "Browsers block loading the data file from file://. Serve the folder (python3 -m http.server 8080 --bind 127.0.0.1) or use GitHub Pages." : "Could not load data/cve-snapshot.json (" + (/^\d+$/.test(err.message) ? "HTTP " + err.message : err instanceof SyntaxError ? "the file is not valid JSON, so it was probably edited or truncated" : "error: " + err.message) + "). Check that data/cve-snapshot.json is in the repo and deployed."; });
+$("lgo").addEventListener("click", lookup);
+$("lq").addEventListener("keydown", e => { if (e.key === "Enter") lookup(); });
 </script>
 </body>
 </html>
