@@ -1,28 +1,44 @@
 name: Update CVE snapshot
 on:
   schedule:
-    - cron: "17 5 * * *"   # daily, 05:17 UTC
+    - cron: "0 6 * * *"          # daily, 06:00 UTC
   workflow_dispatch:
+    inputs:
+      full_refresh:
+        description: "Force the 30-day reconcile pull"
+        type: boolean
+        default: false
 permissions:
-  contents: write
+  contents: write                # only to commit the three files in data/
 concurrency:
   group: update-cve
   cancel-in-progress: false
 jobs:
-  snapshot:
+  ingest:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Build snapshot
+      - name: Self-test (mocked sources, no network)
+        run: python -m unittest discover -s scripts -p "test_*.py"
+      - name: Ingest
+        id: ingest
+        continue-on-error: true
         env:
-          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}   # optional; add under Settings > Secrets and variables > Actions
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}      # optional; Settings > Secrets and variables > Actions
+          BTEEM_FULL: ${{ inputs.full_refresh && '1' || '' }}
         run: python scripts/fetch_cve.py
       - name: Commit if changed
         run: |
           git config user.name "bteem-bot"
           git config user.email "bteem-bot@users.noreply.github.com"
-          git add data/cve-snapshot.json
-          git diff --cached --quiet || (git commit -m "Update CVE snapshot" && git push)
+          git add data/cve-snapshot.json data/kev-catalog.json data/ingest-status.json
+          git diff --cached --quiet || (git commit -m "Update CVE snapshot $(date -u +%F)" && git push)
+      - name: Report failure
+        if: steps.ingest.outcome == 'failure'
+        run: |
+          echo "Ingestion failed. The last good snapshot was kept and data/ingest-status.json records the failure."
+          exit 1
