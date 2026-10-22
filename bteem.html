@@ -3,9 +3,6 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<!-- Serve over HTTPS and also send these as real HTTP headers (meta CSP cannot set frame-ancestors/HSTS):
-     Strict-Transport-Security: max-age=31536000; includeSubDomains
-     X-Content-Type-Options: nosniff | Referrer-Policy: no-referrer | X-Frame-Options: DENY -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https:; base-uri 'none'; form-action 'self'" />
 <title>BlitzThreat EEM (BTEEM) - Environmental Event Management</title>
 <meta name="theme-color" content="#000000" />
@@ -35,6 +32,9 @@
   .hint { color:var(--dim); font-size:1rem; margin:0 auto 2rem; max-width:34rem; }
   h2 { font-size:1rem; color:var(--dim); font-weight:600; margin:2rem 0 .8rem; }
   .mod { background:transparent; border:1px solid var(--line); color:#555; padding:.5rem 1rem; font-weight:600; }
+  a.btn { background:var(--g1); color:#000; font-weight:700; padding:.8rem 1.6rem; border-radius:8px; text-decoration:none; transition:background .3s; }
+  a.btn:hover { background:var(--g2); }
+  a.btn:focus-visible { outline:2px solid var(--g2); outline-offset:3px; }
   a.mod { text-decoration:none; border-radius:8px; font-size:.9rem; }
   a.mod.live { border-color:var(--g1); color:var(--g3); }
   a.mod.live:hover { background:var(--g1); color:#000; }
@@ -76,12 +76,12 @@
   <div class="sub" id="mapName" aria-live="polite"></div>
   <p class="hint">Swipe left/right or use the ◀ ▶ keys to switch maps. Tap a map again, press Enter, or use Open map to launch it in a new tab.</p>
   <div class="row" id="buttons"></div>
-  <div class="row"><button id="openBtn">Open map</button><button id="outBtn" class="alt" style="background:transparent;border:1px solid var(--g1);color:var(--g3)">Sign out</button></div>
+  <div class="row"><button id="openBtn">Open map</button><a class="btn" href="dashboard.html">CVE Dashboard</a><button id="outBtn" class="alt" style="background:transparent;border:1px solid var(--g1);color:var(--g3)">Sign out</button></div>
 
-  <h2>Coming to the suite</h2>
+  <h2>Suite modules</h2>
   <div class="row">
     <button class="mod" disabled>Incident Response</button>
-    <button class="mod live" type="button" onclick="window.location.href='https://blitzwaresolutions.github.io/BlitzThreat/dashboard.html'">CVE/CVSS Dashboard</button>
+    <a class="mod live" href="dashboard.html">CVE / CVSS Dashboard</a>
     <button class="mod" disabled>Telemetry</button>
     <button class="mod" disabled>App Logs</button>
     <button class="mod" disabled>BlitzGate</button>
@@ -89,14 +89,11 @@
 </main>
 
 <footer>
-   <div>&copy; 2026 <a href="https://BlitzWareSolutions.github.io/bws">BlitzWare Solutions LLC</a> All Rights Reserved</div>
+  <div>&copy; 2026 <a href="https://BlitzWareSolutions.github.io/bws">BlitzWare Solutions LLC</a> All Rights Reserved</div>
   <div>Powered By OSINT</div>
 </footer>
 
 <script>
-/* ---------- SSO config (OIDC Authorization Code + PKCE) ----------
-   Fill these from your IdP (Entra ID, Okta, Keycloak, Auth0...). Leave clientId empty for demo mode.
-   Register the redirectUri exactly as the app is hosted, and it must be https. */
 const CFG = {
   authorizeUrl: "",   // e.g. https://login.example.com/oauth2/v2.0/authorize
   tokenUrl: "",       // e.g. https://login.example.com/oauth2/v2.0/token
