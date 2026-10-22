@@ -1,6 +1,7 @@
-# BlitzThreat EEM 
+# BlitzThreat EEM
+**Environmental Event Management.** 
 
-**EEM = Environmental Event Management.** BlitzThreat EEM (BTEEM) is the security monitoring product of the BlitzWare Solutions LLC suite. This repository contains the **demo launcher**: a single-file HTML/JavaScript app that starts with a threat map portal and is the foundation for incident response, vulnerability tracking, telemetry and, eventually, a SIEM.
+BlitzThreat EEM (BTEEM) is the security monitoring product of the BlitzWare Solutions LLC suite. This repository contains the **demo launcher**: a single-file HTML/JavaScript app that starts with a threat map portal and is the foundation for incident response, vulnerability tracking, telemetry and, eventually, a SIEM.
 
 - Product page: https://blitzwaresolutions.github.io/bws/blitzthreat.html
 - Solutions page: https://blitzwaresolutions.github.io/bws/solutions.html
@@ -56,27 +57,41 @@ Works with OIDC providers such as Entra ID, Okta, Keycloak and Auth0. With `CFG`
 
 **Important limitation.** A static page cannot enforce authentication, because the client code can be changed by anyone. Production use needs a backend that validates ID tokens (signature, issuer, audience, nonce), issues an HttpOnly session cookie, and serves protected content only to authenticated users.
 
-## CVE dashboard and data pipeline
+## CVE dashboard and live data pipeline
 
-`dashboard.html` shows live public CVE data without putting any key or backend in front of visitors.
+`dashboard.html` is a static page that reads snapshot files built by a scheduled GitHub Action. No key or backend is ever exposed to visitors.
 
-1. A scheduled GitHub Action (`.github/workflows/update-cve.yml`, daily) runs `scripts/fetch_cve.py`.
-2. The script pulls recent CVEs from the **NIST NVD API 2.0**, flags entries in the **CISA KEV** catalog, adds **FIRST EPSS** exploit-likelihood scores, and writes `data/cve-snapshot.json`.
-3. The dashboard reads that same-origin JSON file. It never calls a third-party API from the browser.
+```
+NVD API 2.0 + CISA KEV catalog + FIRST EPSS
+  -> scripts/fetch_cve.py (retrieve, normalize, merge, deduplicate)
+  -> scripts/validate_snapshot.py (schema and integrity checks)
+  -> atomic replace of data/cve-snapshot.json (only if validation passes)
+  -> dashboard.html
+```
+
+**Files in `data/`:** `cve-snapshot.json` (tracked CVEs, severity counts, per-day counts, per-source status), `kev-catalog.json` (the complete CISA KEV catalog), `ingest-status.json` (result of the latest attempt, so the dashboard can show failed refreshes).
+
+**Schedule:** daily at 06:00 UTC and on demand (Actions > Update CVE snapshot > Run workflow; tick "full_refresh" for a 30-day reconcile). Sunday runs reconcile automatically. Each run re-pulls everything modified in the lookback window (14 days, widened automatically after an outage, 119 days at most), so a missed run leaves no gap. Records are kept if published in the last 14 days or modified in the last 7.
+
+**Failure behavior**
+- NVD failure, an empty result, or any validation failure: the run fails, the last good snapshot is untouched, and `ingest-status.json` records the failure. The dashboard shows a warning.
+- KEV failure: the previous catalog is reused and marked "stale". EPSS failure: earlier scores are kept and the source is marked "partial" or "failed". Neither erases valid NVD data.
+- Files are written to a temporary file, re-read, and only then moved into place. Unchanged data is not committed again.
+- The workflow runs the offline tests first: `python -m unittest discover -s scripts -p "test_*.py"`.
 
 **Setup**
-- Optional but recommended: request a free NVD API key and save it as the repository secret `NVD_API_KEY` (Settings > Secrets and variables > Actions). The key is used only inside the Action.
-- Run the workflow once from the Actions tab (Run workflow) to create the first snapshot.
+1. Optional: request a free NVD API key and save it as the repository secret `NVD_API_KEY`. It is used only inside the Action. Without it the script runs more slowly because of NVD's rate limit.
+2. Run the workflow once. Until the first successful run the dashboard keeps showing the sample data and its "SAMPLE DATA" notice.
+3. Before pushing a change, tag the current version so you can roll back (`git tag BTEEM_BASE2_<previous>`).
 
-**Run locally (for example on Kali)**
+**On-demand CVE lookup.** The dashboard asks NVD (CVE record) and FIRST (EPSS) directly from the browser, and checks KEV against `data/kev-catalog.json`. Results show the source and retrieval time. If the live request fails, a cached snapshot record is shown with a clear "FROM SNAPSHOT" label, never as fresh data. Browser-direct access depends on those services allowing cross-origin requests and on their rate limits, so test it on the deployed site. If NVD blocks browser requests, the options are a small free-tier proxy (for example a Cloudflare Worker that holds the NVD key and rate-limits requests) or dropping lookup of CVEs that are not in the snapshot. Nothing secret is ever placed in the page.
+
+**Run locally**
 ```bash
 export NVD_API_KEY=...            # optional
-python3 scripts/fetch_cve.py      # writes data/cve-snapshot.json
+python3 scripts/fetch_cve.py
 python3 -m http.server 8080 --bind 127.0.0.1
 ```
-Open `http://127.0.0.1:8080`. Bind to `127.0.0.1` only. Run as a normal user, not root.
-
-Snapshot data is only as fresh as the last run. Dashboard text is treated as untrusted and is inserted with `textContent`.
 
 ## Roadmap
 
@@ -94,9 +109,9 @@ Snapshot data is only as fresh as the last run. Dashboard text is treated as unt
 ## Repository layout
 
 ```
-index.html     Demo app (launcher, splash, SSO)
+bteem.html     Demo app (launcher, splash, SSO)
 dashboard.html CVE/CVSS dashboard (reads data/cve-snapshot.json)
-scripts/       fetch_cve.py snapshot builder (stdlib Python)
+scripts/       fetch_cve.py, validate_snapshot.py, test_ingest.py
 data/          cve-snapshot.json (generated)
 .github/       Scheduled workflow that refreshes the snapshot
 README.md      This file
@@ -108,4 +123,3 @@ LICENSE        All rights reserved
 ## License
 
 Copyright (c) 2026 BlitzWare Solutions LLC. All rights reserved. See `LICENSE`.
-
