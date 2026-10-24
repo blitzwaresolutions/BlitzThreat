@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """BTEEM live CVE ingestion: NIST NVD + CISA KEV + FIRST EPSS (Python standard library only).
 
 Writes data/cve-snapshot.json, data/kev-catalog.json and data/ingest-status.json.
