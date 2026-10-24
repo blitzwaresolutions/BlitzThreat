@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# BTEEM_BASE2_102326a
 """Schema and integrity checks for the BTEEM snapshot and KEV catalog (stdlib only).
 CLI: python scripts/validate_snapshot.py data/cve-snapshot.json [data/kev-catalog.json]"""
 import json, re, sys
