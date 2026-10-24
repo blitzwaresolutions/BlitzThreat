@@ -1,0 +1,11 @@
+{
+ "result": "ok",
+ "attempted": "2026-10-24T19:37:55Z",
+ "last_success": "2026-10-24T19:37:55Z",
+ "message": "",
+ "sources": {
+  "nvd": "ok",
+  "kev": "ok",
+  "epss": "ok"
+ }
+}
