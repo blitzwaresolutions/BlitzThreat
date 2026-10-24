@@ -121,6 +121,4 @@ LICENSE        All rights reserved
 ```
 
 ## License
-
-Copyright (c) 
-  <div>&copy; 2026 <a href="https://BlitzWareSolutions.github.io/bws">BlitzWare Solutions LLC</a> All Rights Reserved</div> See `LICENSE`.
+<div>&copy; 2026 <a href="https://BlitzWareSolutions.github.io/bws">BlitzWare Solutions LLC</a> All Rights Reserved. See `LICENSE`</div>
