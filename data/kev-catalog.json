@@ -1,10 +1,12 @@
 {
 "schema_version":1,
-"catalog_version":"2026.10.26",
-"released":"2026-10-26T22:24:24.6101Z",
-"fetched":"2026-10-27T11:51:33Z",
+"catalog_version":"2026.10.27",
+"released":"2026-10-27T19:00:02.2307Z",
+"fetched":"2026-10-28T12:26:16Z",
 "source":"CISA Known Exploited Vulnerabilities Catalog",
 "entries":[
+{"id":"CVE-2026-48356","vendor":"Adobe","product":"Commerce and Magento","name":"Adobe Commerce and Magento Unrestricted Upload of File with Dangerous Type Vulnerability","added":"2026-10-27","due":"2026-11-10","ransomware":false},
+{"id":"CVE-2026-111497","vendor":"Google","product":"Brotli","name":"Google Brotli Unchecked Return Value Vulnerability","added":"2026-10-27","due":"2026-11-10","ransomware":false},
 {"id":"CVE-2026-109618","vendor":"PHP Group","product":"PHP","name":"PHP Memory Corruption Vulnerability","added":"2026-10-26","due":"2026-10-29","ransomware":false},
 {"id":"CVE-2026-109619","vendor":"PHP Group","product":"PHP","name":"PHP Stale Internal Request-State Vulnerability","added":"2026-10-26","due":"2026-10-29","ransomware":false},
 {"id":"CVE-2026-114625","vendor":"Arista","product":"VeloCloud Orchestrator","name":"Arista VeloCloud Orchestrator SQL Injection Vulnerability","added":"2026-10-23","due":"2026-10-26","ransomware":false},
