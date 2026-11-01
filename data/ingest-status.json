@@ -1,11 +1,6 @@
 {
- "result": "ok",
- "attempted": "2026-10-24T19:37:55Z",
- "last_success": "2026-10-24T19:37:55Z",
- "message": "",
- "sources": {
-  "nvd": "ok",
-  "kev": "ok",
-  "epss": "ok"
- }
+ "result": "failed",
+ "attempted": "2026-11-01T12:56:34Z",
+ "message": "NVD retrieval failed (HTTPError: HTTP Error 503: Service Unavailable)",
+ "last_success": "2026-10-31T11:56:16Z"
 }
