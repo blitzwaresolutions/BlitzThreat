@@ -1,10 +1,11 @@
 {
 "schema_version":1,
-"catalog_version":"2026.10.30",
-"released":"2026-10-30T17:02:45.3665Z",
-"fetched":"2026-10-31T11:56:16Z",
+"catalog_version":"2026.11.03",
+"released":"2026-11-03T20:00:24.8741Z",
+"fetched":"2026-11-04T14:02:42Z",
 "source":"CISA Known Exploited Vulnerabilities Catalog",
 "entries":[
+{"id":"CVE-2026-119977","vendor":"WordPress","product":"WordPress Core","name":"WordPress WordPress Core Time-of-check Time-of-use (TOCTOU) Race Condition Vulnerability","added":"2026-11-03","due":"2026-11-06","ransomware":false},
 {"id":"CVE-2026-118527","vendor":"Ivanti","product":"Connect Secure","name":"Ivanti Connect Secure Generation of Predictable Numbers or Identifiers Vulnerability","added":"2026-10-30","due":"2026-11-13","ransomware":false},
 {"id":"CVE-2026-111357","vendor":"Ivanti","product":"Connect Secure","name":"Ivanti Connect Secure Missing Authentication for Critical Function Vulnerability","added":"2026-10-30","due":"2026-11-02","ransomware":false},
 {"id":"CVE-2026-97229","vendor":"GitLab","product":"Community Edition and Enterprise Edition","name":"GitLab Community Edition and Enterprise Edition Integer Overflow or Wraparound Vulnerability","added":"2026-10-29","due":"2026-11-01","ransomware":false},
