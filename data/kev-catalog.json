@@ -1,10 +1,14 @@
 {
 "schema_version":1,
-"catalog_version":"2026.11.06",
-"released":"2026-11-06T19:44:45.1797Z",
-"fetched":"2026-11-07T12:42:55Z",
+"catalog_version":"2026.11.09",
+"released":"2026-11-09T19:54:37.4945Z",
+"fetched":"2026-11-10T14:36:45Z",
 "source":"CISA Known Exploited Vulnerabilities Catalog",
 "entries":[
+{"id":"CVE-2026-102895","vendor":"GPUStack","product":"GPUStack","name":"GPUStack Improper Authentication Vulnerability","added":"2026-11-09","due":"2026-11-12","ransomware":false},
+{"id":"CVE-2026-123158","vendor":"OpenBSD","product":"OpenSSH","name":"OpenBSD OpenSSH Unexpected Status Code or Return Value Vulnerability","added":"2026-11-09","due":"2026-11-12","ransomware":false},
+{"id":"CVE-2026-116779","vendor":"SignalWire","product":"FreeSwitch","name":"SignalWire FreeSwitch Code Injection Vulnerability","added":"2026-11-09","due":"2026-11-12","ransomware":false},
+{"id":"CVE-2026-123218","vendor":"IBM","product":"Aspera Faspex","name":"IBM Aspera Faspex Incorrect Authorization Vulnerability","added":"2026-11-09","due":"2026-11-12","ransomware":false},
 {"id":"CVE-2026-19868","vendor":"SonicWall","product":"SonicOS SSLVPN","name":"SonicWall SonicOS SSLVPN Use of Single-factor Authentication Vulnerability","added":"2026-11-06","due":"2026-11-20","ransomware":false},
 {"id":"CVE-2024-27834","vendor":"Apple","product":"Multiple Products","name":"Apple Multiple Products Improper Authentication Vulnerability","added":"2026-11-04","due":"2026-11-18","ransomware":false},
 {"id":"CVE-2026-119977","vendor":"WordPress","product":"WordPress Core","name":"WordPress WordPress Core Time-of-check Time-of-use (TOCTOU) Race Condition Vulnerability","added":"2026-11-03","due":"2026-11-06","ransomware":false},
