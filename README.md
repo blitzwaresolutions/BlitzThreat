@@ -1,8 +1,6 @@
 # BlitzThreat EEM (BTEEM)
 
-**EEM = Environmental Event Management.**
-
-BlitzThreat EEM is the security monitoring product of the [BlitzWare Solutions LLC](https://blitzwaresolutions.github.io/bws) suite. This repository contains the **demo launcher** and the **CVE Dashboard**: static HTML/JavaScript pages hosted on GitHub Pages, with vulnerability data refreshed automatically by a scheduled GitHub Action. It is the foundation for incident response, telemetry and, eventually, a SIEM.
+**EEM = Environmental Event Management.** BlitzThreat EEM is the security monitoring product of the [BlitzWare Solutions LLC](https://blitzwaresolutions.github.io/bws) suite. This repository contains the **demo launcher** and the **CVE Dashboard**: static HTML/JavaScript pages hosted on GitHub Pages, with vulnerability data refreshed automatically by a scheduled GitHub Action. It is the foundation for incident response, telemetry and, eventually, a SIEM.
 
 - Demo: https://blitzwaresolutions.github.io/BlitzThreat/
 - Product page: https://blitzwaresolutions.github.io/bws/blitzthreat.html
@@ -43,17 +41,18 @@ NVD API 2.0 + CISA KEV catalog + FIRST EPSS
 - `kev-catalog.json`: the complete CISA Known Exploited Vulnerabilities catalog.
 - `ingest-status.json`: the result of the latest attempt.
 
-**Schedule.** Daily at 06:00 UTC, and on demand from **Actions > Update CVE snapshot > Run workflow**. Sunday runs reconcile over a 30-day window. Each run re-pulls everything modified in the lookback window (14 days, widened automatically after an outage, 119 days at most), so a missed run leaves no gap. Records are kept if published in the last 14 days or modified in the last 7.
+**Schedule.** Daily at 06:00 UTC, and on demand from **Actions > Update CVE snapshot > Run workflow**. Sunday runs reconcile over a 30-day window. Each run re-pulls everything modified in the lookback window (14 days, widened automatically after an outage, 119 days at most), so a missed run leaves no gap. **What is tracked:** every CVE published in the last 14 days, plus older CVEs modified in the last 7 days that are on the KEV list or rated CRITICAL or HIGH. Routine NVD re-analysis of old low-risk CVEs is left out. The charts, counts and search all use the same saved records, so they always agree. A safety limit of 4,000 records applies; if it is ever reached, the lowest-risk records are dropped and the number omitted is recorded in `meta.omitted`.
 
 **Failure behavior**
-- NVD failure, an empty result, or any validation failure: the run fails, the last good snapshot is left untouched, and `ingest-status.json` records the failure.
+- NVD failure, an incomplete or empty result (an empty page before NVD's reported total counts as incomplete), or any validation failure: the run fails, the last good snapshot is left untouched, and `ingest-status.json` records the failure.
 - KEV failure: the previous catalog is reused and marked "stale". EPSS failure: earlier scores are kept and the source is marked "partial" or "failed". Neither erases valid NVD data.
-- Files are written to a temporary file, re-read, and only then moved into place. Unchanged data is not committed again.
+- Validation also checks real calendar dates, that severity and per-day counts match the saved records, that every source reports a status, and that the total has not collapsed compared with the last snapshot.
+- Files are written to a temporary file, re-read, and only then moved into place. Unchanged data is not committed again. `ingest-status.json` records the time of the last successful snapshot.
 - The workflow runs offline tests first: `python -m unittest discover -s scripts -p "test_*.py"`.
 
 **Setup**
 1. The workflow file must be at `.github/workflows/update-cve.yml` on the main branch. Files in the repository root are ignored by GitHub Actions.
-2. Under Settings > Actions > General, "Allow all actions and reusable workflows" works. If you restrict actions, allow `actions/checkout` and `actions/setup-python`. The workflow requests its own `contents: write` permission.
+2. Under Settings > Actions > General, "Allow all actions and reusable workflows" works. If you restrict actions, allow `actions/checkout` and `actions/setup-python`. The workflow requests its own `contents: write` permission, which GitHub cannot limit to specific files, so the write token is used only in the commit step. Both actions are pinned to exact commits; update them deliberately.
 3. Optional: request a free NVD API key and save it as the repository secret `NVD_API_KEY`. It is used only inside the Action. Without it the script runs more slowly because of NVD's rate limit.
 4. Run the workflow once, then confirm the three files appear in `data/`.
 
@@ -76,7 +75,7 @@ Snapshot data is only as fresh as the last successful run. Dashboard text comes 
 ## Deploy on GitHub Pages
 
 1. In **Settings > Pages**, set the source to the `main` branch, root folder.
-2. The demo is served over HTTPS at `https://blitzwaresolutions.github.io/BlitzThreat/`.
+2. The demo is served over HTTPS at `https://blitzwaresolutions.github.io/BlitzThreat/`. The root address opens `index.html`, which redirects to `bteem.html`.
 3. The "Launch the demo" button in `blitzthreat.html` (in the `bws` repository) points to that URL.
 
 ## Security
@@ -117,6 +116,7 @@ Next:
 ## Repository layout
 
 ```
+index.html          Redirects the root address to bteem.html
 bteem.html          Launcher (splash, SSO, threat maps)
 dashboard.html      CVE Dashboard (reads data/cve-snapshot.json)
 scripts/            fetch_cve.py, validate_snapshot.py, test_ingest.py
@@ -125,7 +125,6 @@ data/               cve-snapshot.json, kev-catalog.json, ingest-status.json (gen
 README.md           This file
 LICENSE             All rights reserved
 .gitignore          Excludes secrets, logs, dependencies, build output
-.nojekyll           Serve files as-is on GitHub Pages
 ```
 
 ## License
