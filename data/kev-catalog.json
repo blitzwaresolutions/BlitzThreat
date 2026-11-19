@@ -1,10 +1,14 @@
 {
 "schema_version":1,
-"catalog_version":"2026.11.17",
-"released":"2026-11-17T17:53:15.5664Z",
-"fetched":"2026-11-18T15:24:27Z",
+"catalog_version":"2026.11.18",
+"released":"2026-11-18T19:17:41.0354Z",
+"fetched":"2026-11-19T15:29:29Z",
 "source":"CISA Known Exploited Vulnerabilities Catalog",
 "entries":[
+{"id":"CVE-2024-10441","vendor":"Synology","product":"DiskStation Manager (DSM)","name":"Synology DiskStation Manager (DSM) Improper Encoding or Escaping of Output Vulnerability","added":"2026-11-18","due":"2026-11-21","ransomware":false},
+{"id":"CVE-2026-40217","vendor":"BerriAI","product":"LiteLLM","name":"BerriAI LiteLLM Unprotected Alternate Channel Vulnerability","added":"2026-11-18","due":"2026-12-02","ransomware":false},
+{"id":"CVE-2026-90817","vendor":"Vanderbilt University","product":"Research Electronic Data Capture (REDCap)","name":"Vanderbilt University Research Electronic Data Capture (REDCap) Code Injection Vulnerability","added":"2026-11-18","due":"2026-11-21","ransomware":false},
+{"id":"CVE-2026-90436","vendor":"Apache","product":"Axis","name":"Apache Axis Unsafe Reflection Vulnerability","added":"2026-11-18","due":"2026-11-21","ransomware":false},
 {"id":"CVE-2026-115731","vendor":"Perforce","product":"Puppet Enterprise","name":"Perforce Puppet Enterprise Deserialization of Untrusted Data Vulnerability","added":"2026-11-17","due":"2026-12-01","ransomware":false},
 {"id":"CVE-2026-114713","vendor":"UnrealIRCd","product":"UnrealIRCd","name":"UnrealIRCd Improper Neutralization of Delimiters Vulnerability","added":"2026-11-13","due":"2026-11-16","ransomware":false},
 {"id":"CVE-2026-123039","vendor":"Check Point","product":"Multiple Products","name":"Check Point Multiple Products Incorrect Permission Assignment for Critical Resource Vulnerability","added":"2026-11-13","due":"2026-11-16","ransomware":false},
