@@ -1,10 +1,12 @@
 {
 "schema_version":1,
 "catalog_version":"2026.11.23",
-"released":"2026-11-23T12:54:37.9646Z",
-"fetched":"2026-11-23T17:44:46Z",
+"released":"2026-11-23T19:43:55.7979Z",
+"fetched":"2026-11-24T17:16:31Z",
 "source":"CISA Known Exploited Vulnerabilities Catalog",
 "entries":[
+{"id":"CVE-2026-133968","vendor":"Project MONAI","product":"MONAI Label","name":"Project MONAI MONAI Label Path Traversal Vulnerability","added":"2026-11-23","due":"2026-11-26","ransomware":false},
+{"id":"CVE-2026-134624","vendor":"N-able","product":"MailAssure","name":"N-able MailAssure (SpamExperts) Server-Side Request Forgery (SSRF) Vulnerability","added":"2026-11-23","due":"2026-11-26","ransomware":false},
 {"id":"CVE-2026-129448","vendor":"Apache","product":"Roller","name":"Apache Roller Deserialization of Untrusted Data Vulnerability","added":"2026-11-20","due":"2026-11-23","ransomware":false},
 {"id":"CVE-2026-123890","vendor":"Broadcom","product":"VMware vCenter","name":"VMWare vCenter Authentication Bypass Using an Alternate Path or Channel Vulnerability","added":"2026-11-20","due":"2026-11-23","ransomware":false},
 {"id":"CVE-2025-42884","vendor":"SAP","product":"NetWeaver","name":"SAP NetWeaver Improper Neutralization of Special Elements in Data Query Logic Vulnerability","added":"2026-11-20","due":"2026-11-23","ransomware":false},
