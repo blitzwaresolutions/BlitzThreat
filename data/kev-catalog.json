@@ -1,10 +1,11 @@
 {
 "schema_version":1,
-"catalog_version":"2026.11.24",
-"released":"2026-11-24T17:47:46.199Z",
-"fetched":"2026-11-25T00:32:11Z",
+"catalog_version":"2026.11.25",
+"released":"2026-11-25T14:22:29.6361Z",
+"fetched":"2026-11-25T16:58:01Z",
 "source":"CISA Known Exploited Vulnerabilities Catalog",
 "entries":[
+{"id":"CVE-2026-103406","vendor":"Hewlett Packard Enterprise (HPE)","product":"Juniper Session Smart Conductor and Session Smart Router","name":"Hewlett Packard Enterprise (HPE) Juniper Session Smart Conductor and Session Smart Router OS Command Injection Vulnerability","added":"2026-11-25","due":"2026-11-28","ransomware":false},
 {"id":"CVE-2026-132224","vendor":"Optimizely","product":"Web Experimentation","name":"Optimizely Web Experimentation External Control of Critical State Data Vulnerability","added":"2026-11-24","due":"2026-11-27","ransomware":false},
 {"id":"CVE-2026-131914","vendor":"Idunno","product":"AntiCsrf","name":"Idunno AntiCsrf Deserialization of Untrusted Data Vulnerability","added":"2026-11-24","due":"2026-11-27","ransomware":false},
 {"id":"CVE-2026-132165","vendor":"Drupal","product":"Core","name":"Drupal Core Remote Code Execution Vulnerability","added":"2026-11-24","due":"2026-11-27","ransomware":false},
