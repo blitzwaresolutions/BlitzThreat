@@ -1,10 +1,13 @@
 {
 "schema_version":1,
-"catalog_version":"2026.11.23",
-"released":"2026-11-23T19:43:55.7979Z",
-"fetched":"2026-11-24T17:16:31Z",
+"catalog_version":"2026.11.24",
+"released":"2026-11-24T17:47:46.199Z",
+"fetched":"2026-11-25T00:32:11Z",
 "source":"CISA Known Exploited Vulnerabilities Catalog",
 "entries":[
+{"id":"CVE-2026-132224","vendor":"Optimizely","product":"Web Experimentation","name":"Optimizely Web Experimentation External Control of Critical State Data Vulnerability","added":"2026-11-24","due":"2026-11-27","ransomware":false},
+{"id":"CVE-2026-131914","vendor":"Idunno","product":"AntiCsrf","name":"Idunno AntiCsrf Deserialization of Untrusted Data Vulnerability","added":"2026-11-24","due":"2026-11-27","ransomware":false},
+{"id":"CVE-2026-132165","vendor":"Drupal","product":"Core","name":"Drupal Core Remote Code Execution Vulnerability","added":"2026-11-24","due":"2026-11-27","ransomware":false},
 {"id":"CVE-2026-133968","vendor":"Project MONAI","product":"MONAI Label","name":"Project MONAI MONAI Label Path Traversal Vulnerability","added":"2026-11-23","due":"2026-11-26","ransomware":false},
 {"id":"CVE-2026-134624","vendor":"N-able","product":"MailAssure","name":"N-able MailAssure (SpamExperts) Server-Side Request Forgery (SSRF) Vulnerability","added":"2026-11-23","due":"2026-11-26","ransomware":false},
 {"id":"CVE-2026-129448","vendor":"Apache","product":"Roller","name":"Apache Roller Deserialization of Untrusted Data Vulnerability","added":"2026-11-20","due":"2026-11-23","ransomware":false},
