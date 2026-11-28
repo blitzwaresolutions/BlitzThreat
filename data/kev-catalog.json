@@ -1,10 +1,13 @@
 {
 "schema_version":1,
-"catalog_version":"2026.11.25",
-"released":"2026-11-25T19:48:12.4344Z",
-"fetched":"2026-11-26T16:38:58Z",
+"catalog_version":"2026.11.27",
+"released":"2026-11-27T18:03:12.5733Z",
+"fetched":"2026-11-28T15:17:19Z",
 "source":"CISA Known Exploited Vulnerabilities Catalog",
 "entries":[
+{"id":"CVE-2026-120705","vendor":"OSGeo","product":"GeoServer","name":"OSGeo GeoServer XML Injection Vulnerability","added":"2026-11-27","due":"2026-11-30","ransomware":false},
+{"id":"CVE-2026-129243","vendor":"OSGeo","product":"GeoServer","name":"OSGeo GeoServer Incorrect Authorization Vulnerability","added":"2026-11-27","due":"2026-11-30","ransomware":false},
+{"id":"CVE-2026-136716","vendor":"Drupal","product":"Core","name":"Drupal Core Improper Check for Unusual or Exceptional Conditions Vulnerability","added":"2026-11-27","due":"2026-11-30","ransomware":false},
 {"id":"CVE-2026-103406","vendor":"Hewlett Packard Enterprise (HPE)","product":"Juniper Session Smart Conductor and Session Smart Router","name":"Hewlett Packard Enterprise (HPE) Juniper Session Smart Conductor and Session Smart Router OS Command Injection Vulnerability","added":"2026-11-25","due":"2026-11-28","ransomware":false},
 {"id":"CVE-2026-133469","vendor":"Vates","product":"Xen Orchestra","name":"Vates Xen Orchestra Improper Validation of Specified Type of Input Vulnerability","added":"2026-11-25","due":"2026-11-28","ransomware":false},
 {"id":"CVE-2025-41450","vendor":"Danfoss","product":"AK-SM 800A Series","name":"Danfoss AK-SM 800A Series Improper Authentication Vulnerability","added":"2026-11-25","due":"2026-12-09","ransomware":false},
